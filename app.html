@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lens Reach - app</title>
+<style>
+  :root { --accent:#9c2a6b; --ink:#35102a; --paper:#fbf4f8; --soft:#f1dce8; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:Georgia, "Times New Roman", serif; background:var(--paper); color:var(--ink); line-height:1.55; }
+  main { max-width:660px; margin:0 auto; }
+  .boundary { background:#fdeaea; border-left:6px solid #b03030; color:#5c1c1c; border-radius:6px; padding:1rem 1.1rem; }
+  .boundary strong { display:block; margin-bottom:.3rem; }
+  body { padding:2rem 1.2rem; }
+  h1 { font-size:1.8rem; color:var(--accent); }
+  .boundary { margin:1rem 0 1.4rem; }
+  .panel { background:var(--soft); border-left:5px solid var(--accent); border-radius:6px; padding:1rem 1.1rem; margin-bottom:1.1rem; }
+  h2 { font-size:1.1rem; margin-bottom:.6rem; }
+  p.note { font-size:.9rem; margin-bottom:.4rem; }
+  label { display:block; font-size:.9rem; margin:.45rem 0 .1rem; }
+  input { width:100%; padding:.45rem .55rem; font-size:1rem; border:1px solid #d19ab8; border-radius:6px; background:#fff; color:var(--ink); }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.6rem; }
+  .out { margin-top:.7rem; font-size:.98rem; background:#fff; border:1px dashed #d19ab8; border-radius:6px; padding:.6rem .7rem; min-height:2.4rem; overflow-wrap:anywhere; }
+  .out.err { border-color:#b03030; color:#8a1f1f; }
+  footer { margin-top:1.8rem; font-size:.85rem; color:#9a6f88; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Lens Reach</h1>
+  <div class="boundary">
+    <strong>Boundary: arithmetic only</strong>
+    This page works out equivalent focal length, coverage and distance from the numbers you type. The sensor size and the focal length are yours to read off your own camera and lens. It uses the simple distant-subject geometry, so it has not seen your lens and does not know its focusing behaviour, distortion, crop modes or stabilisation, and it gives no verdict that a lens or camera is right for a shot or for a purchase. Every number is your own entry.
+  </div>
+
+  <div class="panel">
+    <h2>The equivalent truth</h2>
+    <p class="note">What a lens frames like on a 36 mm wide full frame sensor. Sensor size and focal length are in mm.</p>
+    <div class="row2">
+      <div><label for="a-w">Sensor width (mm)</label><input id="a-w" type="text" value="23.5"></div>
+      <div><label for="a-h">Sensor height (mm)</label><input id="a-h" type="text" value="15.6"></div>
+      <div><label for="a-f">Focal length (mm)</label><input id="a-f" type="text" value="50"></div>
+    </div>
+    <div class="out" id="a-out"></div>
+  </div>
+
+  <div class="panel">
+    <h2>The coverage truth</h2>
+    <p class="note">The width and height of the scene the lens covers at a distance, using the sensor and lens above.</p>
+    <div class="row2">
+      <div><label for="b-d">Distance (m)</label><input id="b-d" type="text" value="10"></div>
+    </div>
+    <div class="out" id="b-out"></div>
+  </div>
+
+  <div class="panel">
+    <h2>The distance truth</h2>
+    <p class="note">How far away to stand to fit a subject of a given width across the sensor, using the sensor width and lens above.</p>
+    <div class="row2">
+      <div><label for="c-s">Subject width (m)</label><input id="c-s" type="text" value="3"></div>
+    </div>
+    <div class="out" id="c-out"></div>
+  </div>
+
+  <footer>Lens Reach is exact arithmetic over the numbers you enter. <a href="index.html">Why it exists</a>.</footer>
+</main>
+<script src="engine.js"></script>
+<script>
+  function show(id, fn) {
+    const out = document.getElementById(id);
+    try { out.textContent = fn(); out.classList.remove("err"); }
+    catch (e) { out.textContent = e.message; out.classList.add("err"); }
+  }
+  function recalc() {
+    const v = (id) => document.getElementById(id).value;
+    show("a-out", () => equivTruth(v("a-w"), v("a-f")));
+    show("b-out", () => coverTruth(v("a-w"), v("a-h"), v("a-f"), v("b-d")));
+    show("c-out", () => distanceTruth(v("a-w"), v("a-f"), v("c-s")));
+  }
+  document.querySelectorAll("input").forEach((el) => {
+    el.addEventListener("input", recalc);
+    el.addEventListener("change", recalc);
+  });
+  recalc();
+</script>
+</body>
+</html>
